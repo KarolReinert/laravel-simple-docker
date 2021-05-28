@@ -1,0 +1,106 @@
+version: '3.5'
+
+services:
+
+  php:
+    container_name: php
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/php/Dockerfile
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: php
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./app:/var/www
+      - ./docker/dockerfiles/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - backend
+
+  app:
+    container_name: app
+    image: nginx:alpine
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    ports:
+      - "8181:80"
+    volumes:
+      - ./app:/var/www
+      - ./docker/dockerfiles/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./docker/dump/nginx/log:/var/log/nginx
+    depends_on: 
+      - php
+    networks:
+      - backend
+
+  mysql:
+    container_name: mysql
+    image: mysql:8
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3333:3306
+    environment:
+      SERVICE_NAME: mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./docker/dump/app_db:/var/lib/mysql
+    networks:
+      - backend
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/phpmyadmin/Dockerfile
+    depends_on:
+      - mysql
+    restart: always
+    environment:
+      SERVICE_NAME: phpmyadmin
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - '3131:80'
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: redis
+      SERVICE_TAGS: dev
+    ports:
+      - 6379:6379
+    networks:
+      - backend
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    depends_on: 
+      - redis
+    environment:
+      SERVICE_NAME: redis-commander
+      REDIS_HOSTS: redis
+    ports:
+      - "8081:8081"
+    networks: 
+      - backend
+
+networks:
+  backend:
+    driver: bridge
