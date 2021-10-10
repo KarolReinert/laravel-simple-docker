@@ -19,7 +19,6 @@
 <br />
 <p align="center">
   <a href="https://github.com/KarolReinert/laravel-simple-docker">
-    <img src="https://artisan.click/wp-content/uploads/2020/10/logo1-2.png" alt="Logo" width="231" height="75">
   </a>
 
   <h3 align="center">Simple Docker Environment For Laravel</h3>
@@ -158,7 +157,7 @@ Distributed under the WTFPL License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Charles Reinert - [linkedin](https://www.linkedin.com/in/charles-reinert) - contact@artisan.click
+Charles Reinert - [linkedin](https://www.linkedin.com/in/charles-reinert) - contact@reinert.one
 
 
 
